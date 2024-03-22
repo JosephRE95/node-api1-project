@@ -22,6 +22,12 @@ server.get("/api/users", (req, res) => {
 server.get("/api/users/:id", (req, res) => {
   User.findById(req.params.id)
     .then((user) => {
+      
+      if (!user){
+        res.status(404).json({
+            message: "The user with the specified ID does not exist", 
+        })
+      }
       res.status(200).json(user);
     })
     .catch((err) => {
@@ -31,6 +37,8 @@ server.get("/api/users/:id", (req, res) => {
       });
     });
 });
+
+
 
 server.use("*", (req, res) => {
   res.status(404).json({
