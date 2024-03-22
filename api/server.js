@@ -5,6 +5,19 @@ const User = require("./users/model");
 const server = express();
 server.use(express.json());
 
+// delete
+server.delete("/api/users/:id", async (req, res) => {
+  const MayBeUser = await User.findById(req.params.id);
+  if (!MayBeUser) {
+    res.status(404).json({
+      message: "The user with the specified ID does not exist",
+    });
+  } else {
+    const deletedUser = await User.remove(MayBeUser.id);
+    res.status(200).json(deletedUser);
+  }
+});
+
 // create
 server.post("/api/users", (req, res) => {
   const user = req.body;
@@ -13,21 +26,35 @@ server.post("/api/users", (req, res) => {
       message: "Please provide name and bio for the user",
     });
   } else {
-    User.insert(user)
-    .then(createdUser => {
-        res.status(201).json(createdUser)
-    })
+    User.insert(user).then((createdUser) => {
+      res.status(201).json(createdUser);
+    });
   }
 });
 
-// update 
+// update
 
-server.put('/hobbits/:id', (req, res) => { // PUT EXISTING HOBBIT
-    // the id to update is in `req.params.id` and the desired name in `req.body.name`
-    hobbits = hobbits.map(hob => hob.id == req.params.id
-      ? { ...hob, name: req.body.name } : hob);
-    res.status(200).json(hobbits);
-  });
+// delete
+server.put("/api/users/:id", async (req, res) => {
+  const MayBeUser = await User.findById(req.params.id);
+  if (!MayBeUser) {
+    res.status(404).json({
+      message: "The user with the specified ID does not exist",
+    });
+  } else {
+    if (!req.body.name || !req.body.bio) {
+      res.status(400).json({
+     message: "Please provide name and bio for the user"
+      });
+    } else {
+        const updatedUser = await User.update(
+            req.params.id,
+            req.body,
+        )
+        res.status(200).json(updatedUser)
+    }
+  }
+});
 
 //find all
 
@@ -61,9 +88,6 @@ server.get("/api/users/:id", (req, res) => {
       });
     });
 });
-
-
-
 
 server.use("*", (req, res) => {
   res.status(404).json({
